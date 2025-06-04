@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin Sinh viên - <%= student.name %>
+    </title>
+    <link rel="stylesheet" href="/css/notifications.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease-in-out;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .modal-button-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        .modal-button-primary:hover {
+            background-color: #4338ca;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .modal-button-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-button-secondary:hover {
+            background-color: #d1d5db;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-input-focus:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-out;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.375rem !important;
+            padding: 0.3rem 0.5rem !important;
+            min-height: 42px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #e0e7ff !important;
+            border: 1px solid #c7d2fe !important;
+            border-radius: 0.25rem !important;
+            padding: 0.25rem 0.5rem !important;
+            margin: 0.2rem !important;
+            color: #4338ca !important;
+            font-size: 0.875rem !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #4338ca !important; 
+            margin-right: 0.25rem !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #ef4444 !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            padding-left: 2.5rem;
+        }
+
+        .select2-container--default .select2-search--inline .select2-search__field {
+            margin-top: 0.5rem !important;
+        }
+
+
+        .ui-datepicker {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            z-index: 1000 !important;
+            width: 100%;
+            max-width: 340px;
+            position: absolute;
+        }
+
+        .ui-datepicker-header {
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0; 
+            padding: 0.75rem 0;
+            margin-bottom: 0.75rem;
+            border-radius: 0.375rem 0.375rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ui-datepicker-prev,
+        .ui-datepicker-next {
+            cursor: pointer;
+            color: #4a5568; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .ui-datepicker-prev:hover,
+        .ui-datepicker-next:hover {
+            background-color: #edf2f7;
+        }
+
+        .ui-datepicker-title {
+            color: #2d3748;
+            font-weight: 600; 
+            font-size: 1.125rem;
+        }
+
+        .ui-datepicker-calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ui-datepicker-calendar th {
+            color: #718096;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+        }
+
+        .ui-datepicker-calendar td {
+            padding: 0.25rem;
+            text-align: center;
+        }
+
+        .ui-datepicker-calendar td span,
+        .ui-datepicker-calendar td a {
+            display: block;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            color: #2d3748;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .ui-datepicker-calendar td a:hover {
+            background-color: #e2e8f0;
+        }
+
+        .ui-datepicker-calendar td .ui-state-highlight {
+            background-color: #bfdbfe;
+            color: #1e40af; 
+        }
+
+        .ui-datepicker-calendar td .ui-state-active {
+            background-color: #4f46e5; 
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .ui-datepicker-calendar td .ui-state-active:hover {
+            background-color: #4338ca;
+        }
+
+        .ui-datepicker-unselectable span {
+            color: #cbd5e0;
+        }
+
+        .ui-datepicker-buttonpane {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .ui-datepicker-buttonpane button {
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .ui-datepicker-buttonpane button:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen p-6 sm:p-8 md:p-10">
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-8 sm:p-10 md:p-12 border border-gray-100">
+        <div
+            class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8 pb-6 border-b border-gray-200">
+            <img src="<%= student.avatar || 'https://placehold.co/128x128/e0e0e0/ffffff?text=Avatar' %>"
+                alt="Student Avatar"
+                class="w-32 h-32 rounded-full object-cover border-4 border-indigo-500 shadow-lg flex-shrink-0"
+                onerror="this.onerror=null;this.src= 'https://placehold.co/128x128/e0e0e0/ffffff?text=Avatar';" />
+            <div class="text-center sm:text-left flex-grow">
+                <h2 class="text-4xl font-extrabold text-gray-900 leading-tight">
+                    <%= student.name || 'NA' %>
+                </h2>
+                <p class="text-gray-600 text-lg mt-2">ID: <span class="font-medium text-gray-800">
+                        <%= student.id || 'NA' %>
+                    </span></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 pb-2 border-b border-indigo-200">Thông tin cá nhân
+                </h3>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Email:</span>
+                    <%= student.email || 'NA' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Ngày sinh:</span>
+                    <% if (student.dateOfBirth) { %>
+                        <%= new Date(student.dateOfBirth).toLocaleDateString('vi-VN') %>
+                    <% } else { %>
+                        NA
+                    <% } %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Giới tính:</span>
+                    <%= student.gender || 'N/A' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Địa chỉ:</span>
+                    <%= student.address || 'N/A' %>
+                </p>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 pb-2 border-b border-indigo-200">Thông tin học tập
+                </h3>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Lớp:</span>
+                    <%= student.classes && student.classes.length> 0 ? student.classes.join(', ') : 'N/A' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Khóa học:</span>
+                    <%= student.courses && student.courses.length> 0 ? student.courses.join(', ') : 'N/A' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Môn học:</span>
+                    <%= student.subjects && student.subjects.length> 0 ? student.subjects.join(', ') : 'N/A' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Khoa:</span>
+                    <%= student.departments && student.departments.length> 0 ? student.departments.join(', ') : 'N/A' %>
+                </p>
+                <p class="text-base text-gray-700 mb-2"><span class="font-semibold text-gray-800">Giảng viên:</span>
+                    <%= student.instructors && student.instructors.length> 0 ? student.instructors.join(', ') : 'N/A' %>
+                </p>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200 col-span-1 md:col-span-2">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 pb-2 border-b border-indigo-200">Điểm số</h3>
+
+                <% if (student.grades && student.grades.length > 0) { %>
+                <h4 class="font-bold text-lg text-gray-800 mt-4 mb-3">Chi tiết điểm từng môn:</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Môn học
+                                </th>
+                                <th class="py-3 px-4 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Điểm quá trình
+                                </th>
+                                <th class="py-3 px-4 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Điểm giữa kỳ
+                                </th>
+                                <th class="py-3 px-4 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Điểm cuối kỳ
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% student.grades.forEach(grade => { %>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-base text-gray-700 border-b border-gray-200">
+                                        <%= grade.subject %>
+                                    </td>
+                                    <td class="py-3 px-4 text-center text-base text-gray-700 border-b border-gray-200">
+                                        <%= grade.process !== null && grade.process !== undefined ? Number(grade.process).toFixed(1) : '-' %>
+                                    </td>
+                                    <td class="py-3 px-4 text-center text-base text-gray-700 border-b border-gray-200">
+                                        <%= grade.midterm !== null && grade.midterm !== undefined ? Number(grade.midterm).toFixed(1) : '-' %>
+                                    </td>
+                                    <td class="py-3 px-4 text-center text-base text-gray-700 border-b border-gray-200">
+                                        <%= grade.final !== null && grade.final !== undefined ? Number(grade.final).toFixed(1) : '-' %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-gray-500 italic text-base">Không có điểm môn học nào được ghi nhận.</p>
+                <% } %>
+                
+                <p class="font-bold text-lg text-gray-800 mt-4 mb-3">
+                    <span class="font-semibold text-gray-800">Điểm trung bình:</span>
+                    <span class="font-bold">
+                        <% if (student.scores && student.scores.average !==undefined && student.scores.average !==null) { %>
+                            <%= parseFloat(student.scores.average).toFixed(1) %>
+                            <% } else { %>
+                                <span class="text-gray-400">-</span>
+                            <% } %>
+                    </span>
+                </p>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200 col-span-1 md:col-span-2">
+                <h3 class="font-bold text-xl text-indigo-700 mb-4 pb-2 border-b border-indigo-200">Thông tin tài chính
+                </h3>
+                <p class="text-base text-gray-700 mb-2">
+                    <span class="font-semibold text-gray-800">Học phí:</span>
+                    <span class="font-bold text-gray-900">
+                        <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND' ,
+                            minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(student.tuition) %>
+                    </span>
+                </p>
+                <p class="text-base text-gray-700 mb-4">
+                    <span class="font-semibold text-gray-800">Trạng thái thanh toán:</span>
+                    <span class="<%= student.payment_status && student.payment_status.toLowerCase() === 'đã thanh toán' 
+                                ? 'text-green-600 font-bold' 
+                                : 'text-red-600 font-bold' %>">
+                        <%= student.payment_status || 'Unknown' %>
+                    </span>
+                </p>
+
+                <% if (student.payment_history && student.payment_history.length> 0) { %>
+                <h4 class="font-bold text-lg text-gray-800 mt-4 mb-3">Lịch sử thanh toán:</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th
+                                    class="py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Ngày thanh toán</th>
+                                <th
+                                    class="py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                    Số tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% student.payment_history.forEach(payment=> { %>
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-3 px-4 text-base text-gray-700 border-b border-gray-200">
+                                    <%= new Date(payment.date).toLocaleDateString('vi-VN') %>
+                                </td>
+                                <td
+                                    class="py-3 px-4 text-base text-gray-700 border-b border-gray-200 font-medium">
+                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND' ,
+                                        minimumFractionDigits: 0, maximumFractionDigits: 0
+                                        }).format(payment.amount) %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-gray-500 italic text-base">Chưa có lịch sử thanh toán.</p>
+                <% } %>
+            </div>
+        </div>
+        <div
+            class="mt-10 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4 border-t pt-6 border-gray-200">
+            <a href="/" class="modal-button modal-button-secondary">
+                <i class="fas fa-arrow-left text-sm"></i>
+                <span>Quay lại danh sách</span>
+            </a>
+            <div class="flex space-x-3">
+                <button onclick="showEditModal()" class="modal-button modal-button-primary">
+                    <i class="fas fa-edit text-sm"></i>
+                    <span>Chỉnh sửa</span>
+                </button>
+                <button onclick="showDeleteConfirmModal('<%= student.id %>')"
+                    class="modal-button bg-red-500 text-white hover:bg-red-600">
+                    <i class="fas fa-trash-alt text-sm"></i>
+                    <span>Xóa</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal"
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 overflow-y-auto z-50 hidden">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl relative transform max-h-[95vh] overflow-y-auto"
+            role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+            <button type="button" onclick="closeEditModal()"
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200 focus:outline-none p-2 rounded-full hover:bg-gray-100">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+            <div class="px-8 py-8">
+                <form id="editForm" class="space-y-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8" id="modal-headline">Chỉnh sửa thông tin sinh viên
+                    </h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-gray-50 p-6 rounded-lg space-y-5 border border-gray-200 shadow-inner">
+                            <h3 class="font-bold text-xl text-indigo-700 mb-4">Thông tin cá nhân</h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Họ Tên</label>
+                                <input type="text" name="name" value="<%= student.name %>"
+                                    class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">email</label>
+                                <input type="email" name="email" value="<%= student.email %>"
+                                    class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                                <div class="relative">
+                                    <input type="text" 
+                                        id="editStudentDateOfBirthDisplay"
+                                        class="form-input-focus mt-1 block w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                        placeholder="DD-MM-YYYY"
+                                        maxlength="10"
+                                    >
+                                    <input type="hidden" 
+                                        id="editStudentDateOfBirthHidden" 
+                                        name="dateOfBirth"
+                                    >
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-calendar text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
+                                <select name="gender"
+                                    class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                    <option value="Nam" <%=student.gender==='Nam' ? 'selected' : '' %>>Nam</option>
+                                    <option value="Nữ" <%=student.gender==='Nữ' ? 'selected' : '' %>>Nữ</option>
+                                    <option value="Khác" <%=student.gender==='Khác' ? 'selected' : '' %>>Khác</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                                <textarea name="address"
+                                    class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm h-24 sm:text-sm"><%= student.address %></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">URL Ảnh đại diện</label>
+                                <input type="url" name="avatar" value="<%= student.avatar %>"
+                                    class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-8">
+                            <div class="bg-gray-50 p-6 rounded-lg space-y-5 border border-gray-200 shadow-inner">
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-graduation-cap text-blue-600"></i>
+                                    </div>
+                                    <h3 class="font-bold text-xl text-indigo-700">Thông tin học tập</h3>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 required">Khóa
+                                            học</label>
+                                        <div class="relative">
+                                            <select id="editStudentCourse" name="course"
+                                                class="form-input-focus mt-1 block w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                                <option value="">Chọn khóa học</option>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 left-0 top-1/2 -translate-y-1/2 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-book text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1 flex items-center">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Khóa học hiện tại: <%= student.courses.join(', ') || ' Chưa có' %>
+                                        </p>
+                                    </div>
+
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 required">Lớp</label>
+                                        <div class="relative">
+                                            <select id="editStudentClass" name="class" disabled
+                                                class="form-input-focus mt-1 block w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                                <option value="">Chọn lớp</option>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 left-0 top-1/2 -translate-y-1/2 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-users text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1 flex items-center">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Lớp hiện tại: <%= student.classes.join(', ') || ' Chưa có' %>
+                                        </p>
+                                    </div>
+
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 required">Môn
+                                            học</label>
+                                        <div class="relative">
+                                            <select id="editStudentSubjects" name="subjects[]" multiple disabled
+                                                class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 left-0 top-1/2 -translate-y-1/2 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-book-open text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1 flex items-center">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Môn học hiện tại: <%= student.subjects.join(', ') || ' Chưa có' %>
+                                        </p>
+                                    </div>
+
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Khoa</label>
+                                        <div class="relative">
+                                            <input type="text" id="editStudentDepartment" readonly
+                                                value="<%= student.departments.join(', ') || 'Chưa có' %>"
+                                                class="form-input-focus mt-1 block w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-university text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Giảng viên</label>
+                                        <div class="relative">
+                                            <input type="text" id="editStudentInstructors" readonly
+                                                value="<%= student.instructors.join(', ') || 'Chưa có' %>"
+                                                class="form-input-focus mt-1 block w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-chalkboard-teacher text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-6 rounded-lg space-y-5 border border-gray-200 shadow-inner">
+                                <h3 class="font-bold text-xl text-indigo-700 mb-4">Thông tin tài chính</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Học phí</label>
+                                    <input type="text" name="tuition" value="<%= new Intl.NumberFormat('vi-VN', { 
+                                        style: 'currency', 
+                                        currency: 'VND',
+                                        maximumFractionDigits: 0,
+                                        minimumFractionDigits: 0
+                                        }).format(student.tuition || 0) %>" data-original-value="<%= student.tuition || 0 %>"
+                                        class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                        oninput="formatCurrency(this)" onblur="handleCurrencyBlur(this)"
+                                        onfocus="handleCurrencyFocus(this)">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái thanh
+                                        toán</label>
+                                    <select name="payment_status"
+                                        class="form-input-focus mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                        <option value="Đã thanh toán" <%=student.payment_status==='Đã thanh toán'
+                                            ? 'selected' : '' %>>Đã thanh toán</option>
+                                        <option value="Chưa thanh toán" <%=student.payment_status==='Chưa thanh toán'
+                                            ? 'selected' : '' %>>Chưa thanh toán</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-lg space-y-5 border border-gray-200 shadow-inner">
+                        <h3 class="font-bold text-xl text-indigo-700 mb-4">Điểm số</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Điểm chi tiết từng môn</label>
+                            <div id="subject-scores-container"
+                                class="space-y-3 border border-gray-300 rounded-md p-4 bg-white">
+                                <% if (student.subjects && student.subjects.length > 0) { %>
+                                    <% student.subjects.forEach(subject => { %>
+                                        <% const grade = student.grades?.find(g => g.subject === subject); %>
+                                        <div class="flex items-center gap-4">
+                                            <span class="flex-1 text-base text-gray-700 font-medium"><%= subject %></span>
+                                            <div class="flex gap-4">
+                                                <div class="relative">
+                                                    <input type="number" 
+                                                        name="grades[<%= subject %>][process_score]" 
+                                                        value="<%= grade?.process !== null && grade?.process !== undefined ? Number(grade.process).toFixed(1) : '' %>"
+                                                        class="w-20 p-2 border border-gray-300 rounded-md text-sm text-center form-input-focus subject-score-input"
+                                                        step="0.1" 
+                                                        min="0" 
+                                                        max="10"
+                                                        placeholder="QT"
+                                                        oninput="window.validateScore(this)"
+                                                        onchange="window.calculateAverageScore()"
+                                                        onblur="window.formatScore(this)">
+                                                    <span class="absolute -top-5 left-0 text-xs text-gray-500">Quá trình</span>
+                                                </div>
+
+                                                <div class="relative">
+                                                    <input type="number" 
+                                                        name="grades[<%= subject %>][midterm_score]" 
+                                                        value="<%= grade?.midterm !== null && grade?.midterm !== undefined ? Number(grade.midterm).toFixed(1) : '' %>"
+                                                        class="w-20 p-2 border border-gray-300 rounded-md text-sm text-center form-input-focus subject-score-input"
+                                                        step="0.1" 
+                                                        min="0" 
+                                                        max="10"
+                                                        placeholder="GK"
+                                                        oninput="window.validateScore(this)"
+                                                        onchange="window.calculateAverageScore()"
+                                                        onblur="window.formatScore(this)">
+                                                    <span class="absolute -top-5 left-0 text-xs text-gray-500">Giữa kỳ</span>
+                                                </div>
+
+                                                <div class="relative">
+                                                    <input type="number" 
+                                                        name="grades[<%= subject %>][final_score]" 
+                                                        value="<%= grade?.final !== null && grade?.final !== undefined ? Number(grade.final).toFixed(1) : '' %>"
+                                                        class="w-20 p-2 border border-gray-300 rounded-md text-sm text-center form-input-focus subject-score-input"
+                                                        step="0.1" 
+                                                        min="0" 
+                                                        max="10"
+                                                        placeholder="CK"
+                                                        oninput="window.validateScore(this)"
+                                                        onchange="window.calculateAverageScore()"
+                                                        onblur="window.formatScore(this)">
+                                                    <span class="absolute -top-5 left-0 text-xs text-gray-500">Cuối kỳ</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                <p class="text-gray-500 italic text-sm text-center">Không có môn học nào để nhập điểm.</p>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Điểm trung bình</label>
+                            <input type="text" id="editStudentAverageScore" readonly
+                                class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="closeEditModal()"
+                            class="modal-button modal-button-secondary">
+                            <i class="fas fa-times mr-2"></i>
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" class="modal-button modal-button-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal"
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 overflow-y-auto z-50 hidden">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md relative transform"
+            role="dialog" aria-modal="true" aria-labelledby="delete-modal-headline">
+            <button type="button" onclick="closeDeleteConfirmModal()"
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200 focus:outline-none p-2 rounded-full hover:bg-gray-100">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+            <div class="px-8 py-8 text-center">
+                <div class="mb-6">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-6xl mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2" id="delete-modal-headline">Xác nhận xóa sinh viên
+                    </h3>
+                    <p class="text-gray-600 text-base">Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không
+                        thể hoàn tác.</p>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button type="button" onclick="closeDeleteConfirmModal()"
+                        class="modal-button modal-button-secondary">
+                        Hủy bỏ
+                    </button>
+                    <button type="button" id="confirmDeleteBtn"
+                        class="modal-button bg-red-500 text-white hover:bg-red-600">
+                        Xóa ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification-container" class="fixed bottom-4 right-4 z-[100] space-y-3"></div>
+
+    <script>window.studentData = JSON.parse('<%- JSON.stringify(student) %>');</script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/information.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/notifications.css" rel="stylesheet">
+    <title>Student Management Dashboard</title>
+
+</head>
+
+<body class="bg-gray-100 text-gray-800 font-inter">
+    <div class="min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 text-center md:text-left">Student Management Dashboard</h1>
+                
+                <div class="flex items-center relative">
+                    <div class="flex items-center space-x-3 cursor-pointer hover:bg-gray-200 rounded-full px-4 py-2 transition-colors duration-200"
+                        id="userMenuButton">
+                        <img src="<%= user.avatarURL %>" alt="Profile"
+                            class="w-9 h-9 rounded-full object-cover border-2 border-blue-500">
+                        <span class="font-medium text-gray-700 hidden md:inline">
+                            <%= user.username %>
+                        </span>
+                        <i class="fas fa-chevron-down text-sm text-gray-600"></i>
+                    </div>
+
+                    <!-- User Dropdown Menu -->
+                    <div id="userMenu"
+                        class="hidden absolute right-0 top-12 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                        <a href="/auth/profile"
+                            class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                            <i class="fas fa-user w-5 mr-3 text-blue-500"></i>
+                            <span>Thông tin tài khoản</span>
+                        </a>
+                        <a href="#" onclick="showSettingsModal(); return false;"
+                            class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                            <i class="fas fa-cog w-5 mr-3 text-gray-500"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                        <hr class="my-2 border-gray-200">
+                        <a href="/auth/logout"
+                            class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors duration-150">
+                            <i class="fas fa-sign-out-alt w-5 mr-3 text-red-500"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Add Student Section -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div class="flex-grow w-full md:w-1/2">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" placeholder="Tìm kiếm sinh viên theo tên, lớp, môn học..."
+                            class="w-full pl-12 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                </div>
+                <% if (locals.user && user.role !== 'student') { %>
+                <button onclick="showAddModal()"
+                    class="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Thêm Sinh Viên Mới</span>
+                </button>
+                <% } %>
+            </div>
+
+            <!-- Student Table Section -->
+            <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+                <table class="min-w-full table-auto bg-white text-gray-800">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                            <th class="p-4 text-left whitespace-nowrap">ID</th>
+                            <th class="p-4 text-center w-16">Avatar</th>
+                            <th class="p-4 text-left min-w-[150px]">Họ Tên</th>
+                            <th class="p-4 text-left w-32">Lớp</th>
+                            <th class="p-4 text-left min-w-[200px]">Khóa Học</th>
+                            <th class="p-4 text-left min-w-[200px]">Môn Học</th>
+                            <th class="p-4 text-center w-20">Điểm TB</th>
+                            <th class="p-4 text-right w-36">Học Phí</th>
+                            <th class="p-4 text-center w-24">Trạng Thái</th>
+                            <% if (locals.user && user.role !== 'student') { %>
+                            <th class="p-4 text-center w-28">Thao Tác</th>
+                            <% } %>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm font-light">
+                        <% if (locals.students && students.length > 0) { %>
+                            <% students.forEach(function(student) { %>
+                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                                    data-student-id="<%= student.id %>">
+                                    <td class="p-4 text-left whitespace-nowrap" data-label="ID">
+                                        <%= student.id %>
+                                    </td>
+                                    <td class="p-4 text-center" data-label="Avatar">
+                                        <div class="flex justify-center">
+                                            <img src="<%= student.avatar %>" alt="Avatar"
+                                                class="w-10 h-10 rounded-full object-cover border">
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-left font-medium" data-label="Họ Tên">
+                                        <%= student.name %>
+                                    </td>
+                                    <td class="p-4 text-left" data-label="Lớp">
+                                        <div class="truncate" title="<%= student.class || 'N/A' %>">
+                                            <%= student.class || 'N/A' %>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-left" data-label="Khóa Học">
+                                        <div class="max-w-xs overflow-hidden text-ellipsis"
+                                            title="<%= student.courses ? student.courses.join(', ') : '' %>">
+                                            <% if (student.courses && student.courses.length > 0) { %>
+                                                <%= student.courses.join(', ') %>
+                                            <% } else { %>
+                                                <span class="text-gray-400">N/A</span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-left" data-label="Môn Học">
+                                        <div class="max-w-xs overflow-hidden text-ellipsis"
+                                            title="<%= student.subjects ? student.subjects.join(' , ') : '' %>">
+                                            <% if (student.subjects && student.subjects.length > 0) { %>
+                                                <%= student.subjects.join(' , ') %>
+                                            <% } else { %>
+                                                <span class="text-gray-400">N/A</span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center font-medium" data-label="Điểm TB">
+                                        <% if (student.scores && student.scores.average !== undefined && student.scores.average !== null) { %>
+                                            <span class="px-3 py-1 rounded-full text-sm
+                                                <% if (parseFloat(student.scores.average) >= 8.0) { %>
+                                                    bg-green-100 text-green-800
+                                                <% } else if (parseFloat(student.scores.average) >= 6.5) { %>
+                                                    bg-blue-100 text-blue-800
+                                                <% } else if (parseFloat(student.scores.average) >= 5.0) { %>
+                                                    bg-yellow-100 text-yellow-800
+                                                <% } else { %>
+                                                    bg-red-100 text-red-800
+                                                <% } %>
+                                            ">
+                                                <%= parseFloat(student.scores.average).toFixed(1) %>
+                                            </span>
+                                        <% } else { %>
+                                            <span class="text-gray-400">-</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="p-4 text-right" data-label="Học Phí">
+                                        <div class="truncate font-medium text-gray-700"
+                                            title="<%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(student.tuition != null ? student.tuition : 0) %>">
+                                            <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(student.tuition != null ? student.tuition : 0) %>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center truncate" data-label="Trạng Thái">
+                                        <span class="status-badge <%=
+                                            (student.payment_status || '').toLowerCase() === 'đã thanh toán' ? 'status-paid' :
+                                            (student.payment_status || '').toLowerCase() === 'chưa thanh toán' ? 'status-unpaid' :
+                                            'status-unpaid'
+                                        %>">
+                                            <%= student.payment_status || 'Unknown' %>
+                                        </span>
+                                    </td>
+                                    <% if (locals.user && user.role !== 'student') { %>
+                                    <td class="p-4" data-label="Thao Tác">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <a href="/auth/information/<%= student.id %>"
+                                                class="text-blue-500 hover:text-blue-700 transition-colors duration-150"
+                                                title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="/auth/information/<%= student.id %>?edit=true"
+                                                class="text-green-500 hover:text-green-700 transition-colors duration-150"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                onclick="deleteStudent('<%= student.id %>', '<%= student.name %>')"
+                                                class="text-red-500 hover:text-red-700 transition-colors duration-150"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <% } %>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="10" class="p-8 text-center text-gray-500">
+                                    <div class="flex flex-col items-center py-4">
+                                        <i class="fas fa-inbox text-4xl mb-3 text-gray-400"></i>
+                                        <p class="text-lg">Không tìm thấy sinh viên nào</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 gap-4">
+                <span id="studentCountInfo">
+                    Hiển thị <%= locals.students ? students.length : 0 %> sinh viên
+                </span>
+                <div id="paginationContainer" class="flex flex-col sm:flex-row justify-between items-center mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-200 hidden">
+                    <button id="prevPageButton" class="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed mb-3 sm:mb-0 sm:w-auto w-full">
+                        <i class="fas fa-arrow-left"></i>
+                        Trước
+                    </button>
+                    <span id="pageInfo" class="text-gray-700 font-medium text-lg px-4 py-2 rounded-md bg-gray-100">Trang 1 / 1</span>
+                    <button id="nextPageButton" class="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                        Sau
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div> 
+    
+    <!-- Add Student Modal -->
+    <div id="addStudentModalContainer"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl relative transform transition-all duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                            <i class="fas fa-user-plus text-blue-600"></i>
+                        </div>
+                        Thêm Sinh Viên Mới
+                    </h3>
+                    <button type="button" onclick="closeAddModal()"
+                        class="text-gray-400 hover:text-gray-500 focus:outline-none transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-6">
+                <form id="addStudentForm" class="space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Personal Information Section -->
+                        <div
+                            class="bg-gradient-to-b from-gray-50 to-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-user text-blue-600 text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">Thông tin cá nhân</h3>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="form-group">
+                                    <label class="form-label required">Họ và tên</label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-user text-gray-400"></i>
+                                        </div>
+                                        <input type="text" name="name" required
+                                            class="form-input pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            placeholder="Nhập họ và tên đầy đủ">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label required">Email</label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                        </div>
+                                        <input type="email" name="email" required
+                                            class="form-input pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            placeholder="example@email.com">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label required">Ngày sinh</label>
+                                        <div class="relative rounded-lg shadow-sm">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-calendar text-gray-400"></i>
+                                            </div>
+                                            <input type="date" name="dateOfBirth" required
+                                                class="form-input pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required">Giới tính</label>
+                                        <div class="relative rounded-lg shadow-sm">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-venus-mars text-gray-400"></i>
+                                            </div>
+                                            <select name="gender" required
+                                                class="form-select pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                                <option value="">Chọn giới tính</option>
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Địa chỉ</label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
+                                            <i class="fas fa-home text-gray-400"></i>
+                                        </div>
+                                        <textarea name="address" rows="2"
+                                            class="form-input pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            placeholder="Nhập địa chỉ"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information Section -->
+                        <div
+                            class="bg-gradient-to-b from-blue-50 to-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-graduation-cap text-blue-600 text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">Thông tin học tập</h3>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="form-group">
+                                    <label class="form-label required" for="addStudentCourse">Khóa học</label>
+                                    <select id="addStudentCourse" name="course" class="form-select pl-10" required>
+                                        <option value="">Chọn khóa học</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="form-label required" for="addStudentClass">Lớp</label>
+                                    <select name="class" id="addStudentClass" class="form-select" disabled>
+                                        <option value="">Chọn lớp</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-2">Chọn khóa học trước để xem các lớp</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="form-label required" for="addStudentSubject">Môn học</label>
+                                    <select name="subject" id="addStudentSubject" class="form-select" disabled>
+                                        <option value="">Chọn môn học</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-2">Có thể chọn nhiều môn học</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="form-label required" for="addStudentDepartment">Khoa</label>
+                                    <input type="text" name="department" id="addStudentDepartment" class="form-input"
+                                        readonly>
+                                    <p class="text-xs text-gray-500 mt-2">Khoa của môn học đã chọn</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="form-label required" for="addStudentInstructors">Giảng
+                                        viên</label>
+                                    <input type="text" name="instructors" id="addStudentInstructors" class="form-input"
+                                        readonly>
+                                    <p class="text-xs text-gray-500 mt-2">Giảng viên phụ trách môn học đã chọn
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scores Section -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-yellow-100 rounded-lg">
+                                    <i class="fas fa-star text-yellow-600 text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">Điểm số</h3>
+                            </div>
+                            <div>
+                                <label class="form-label">Điểm chi tiết từng môn</label>
+                                <div id="subjectScoresList"
+                                    class="space-y-4 border border-gray-200 rounded-md p-4 bg-white">
+                                    <p class="text-gray-500 italic text-sm text-center" id="noSubjectsMessage">
+                                        Chưa có môn học nào được chọn
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="relative mt-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Điểm trung bình</label>
+                                <input type="text" id="addStudentAverageScore" readonly
+                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+                                    placeholder="Điểm TB = QT(30%) + GK(20%) + CK(50%)">
+                            </div>
+                        </div>
+
+                        <!-- Financial Information Section -->
+                        <div
+                            class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <i class="fas fa-money-bill text-green-600 text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">Thông tin học phí</h3>
+                            </div>
+
+                            <div class="grid gap-6">
+                                <div class="form-group">
+                                    <div class="flex items-center mb-2">
+                                        <label class="form-label required mb-0">Học phí</label>
+                                        <div class="ml-2 text-xs text-gray-500">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>VND</span>
+                                        </div>
+                                    </div>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500">đ</span>
+                                        </div>
+                                        <input type="text" name="tuition" id="addStudentTuition" required
+                                            class="form-input pl-8 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            placeholder="Nhập số tiền học phí"
+                                            oninput="formatCurrency(this)"
+                                            onfocus="handleCurrencyFocus(this)"
+                                            onblur="handleCurrencyBlur(this)">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Trạng thái thanh toán</label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-receipt text-gray-400"></i>
+                                        </div>
+                                        <select name="paymentStatus" required
+                                            class="form-select pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                            <option value="">Chọn trạng thái</option>
+                                            <option value="Đã thanh toán">Đã thanh toán</option>
+                                            <option value="Chưa thanh toán">Chưa thanh toán</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="modal-footer">
+                        <button type="button" onclick="closeAddModal()"
+                            class="modal-button modal-button-secondary">
+                            <i class="fas fa-times"></i>
+                            Hủy
+                        </button>
+                        <button type="submit" class="modal-button modal-button-primary">
+                            <i class="fas fa-save"></i>
+                            Lưu Sinh Viên
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmationModal"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0 pointer-events-none">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative transform transition-all duration-300 ease-out scale-95 opacity-0"
+            role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+            <div class="px-6 py-4 border-b border-gray-200 bg-red-50 rounded-t-xl">
+                <h3 id="delete-modal-title" class="text-xl font-bold text-red-800 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                    Xác nhận xóa sinh viên
+                </h3>
+            </div>
+            <div class="p-6 text-gray-700">
+                <p class="mb-4">Bạn có chắc chắn muốn xóa sinh viên <span id="addStudentName" class="font-semibold text-gray-900"></span> (ID: <span id="studentIdToDelete" class="font-semibold text-gray-900"></span>) không? Thao tác này không thể hoàn tác.</p>
+                <p class="text-sm text-gray-500 italic">Tất cả dữ liệu liên quan đến sinh viên này (điểm số, tài chính, lớp học) cũng sẽ bị xóa.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeDeleteModal()"
+                    class="modal-button modal-button-secondary">
+                    <i class="fas fa-times"></i>
+                    Hủy
+                </button>
+                <button type="button" id="confirmDeleteButton"
+                    class="modal-button bg-red-600 text-white hover:bg-red-700">
+                    <i class="fas fa-trash-alt"></i>
+                    Xác nhận xóa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModalContainer"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative transform transition-all duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="settings-modal-headline">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                            <i class="fas fa-cog text-blue-600"></i>
+                        </div>
+                        Cài đặt
+                    </h3>
+                    <button type="button" onclick="closeSettingsModal()"
+                        class="text-gray-400 hover:text-gray-500 focus:outline-none transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-6 space-y-6">
+                <!-- Theme Setting -->
+                <div class="setting-section">
+                    <h4><i class="fas fa-paint-brush text-blue-500"></i>Giao diện</h4>
+                    <div class="theme-buttons">
+                        <button class="theme-button bg-gray-200 text-gray-700" data-theme="light"
+                            onclick="updateTheme('light')">
+                            <i class="fas fa-sun"></i>
+                            <span>Sáng</span>
+                        </button>
+                        <button class="theme-button bg-gray-200 text-gray-700" data-theme="dark"
+                            onclick="updateTheme('dark')">
+                            <i class="fas fa-moon"></i>
+                            <span>Tối</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Font Size Setting -->
+                <div class="setting-section">
+                    <h4><i class="fas fa-font text-purple-500"></i>Cỡ chữ</h4>
+                    <div class="font-size-controls">
+                        <button class="font-button" onclick="updateFontSize(-10)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="fontSizeDisplay" class="text-xl font-semibold">100%</span>
+                        <button class="font-button" onclick="updateFontSize(10)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Background Color Setting -->
+                <div class="setting-section">
+                    <h4><i class="fas fa-fill-drip text-green-500"></i>Màu nền</h4>
+                    <div class="color-grid">
+                        <div class="color-button bg-gray-100" data-background="#f3f4f6"
+                            onclick="updateBackground('#f3f4f6')"></div>
+                        <div class="color-button bg-white" data-background="#ffffff"
+                            onclick="updateBackground('#ffffff')"></div>
+                        <div class="color-button bg-blue-100" data-background="#dbeafe"
+                            onclick="updateBackground('#dbeafe')"></div>
+                        <div class="color-button bg-green-100" data-background="#dcfce7"
+                            onclick="updateBackground('#dcfce7')"></div>
+                        <div class="color-button bg-yellow-100" data-background="#fef3c7"
+                            onclick="updateBackground('#fef3c7')"></div>
+                        <div class="color-button bg-red-100" data-background="#ffe4e6"
+                            onclick="updateBackground('#ffe4e6')"></div>
+                        <div class="color-button bg-sky-100" data-background="#e0f2fe"
+                            onclick="updateBackground('#e0f2fe')"></div>
+                        <div class="color-button bg-violet-100" data-background="#ede9fe"
+                            onclick="updateBackground('#ede9fe')"></div>
+                    </div>
+                </div>
+
+                <!-- Language Setting -->
+                <div class="setting-section">
+                    <h4><i class="fas fa-language text-indigo-500"></i>Ngôn ngữ</h4>
+                    <select id="languageSelect" class="language-select" onchange="updateLanguage(this.value)">
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="resetSettingsToDefault()"
+                    class="modal-button modal-button-secondary">
+                    <i class="fas fa-undo"></i>
+                    Đặt lại mặc định
+                </button>
+                <button type="button" onclick="closeSettingsModal()"
+                    class="modal-button modal-button-primary">
+                    <i class="fas fa-check"></i>
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="/js/index.js"></script>
+    <script src="/js/studentForm.js"></script>
+    <script src="/js/style.js"></script>
+</body>
+
+</html>
