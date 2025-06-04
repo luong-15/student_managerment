@@ -76,8 +76,14 @@ class Student {
 
             return studentsQueryResult.map(student => {
                 const studentGrades = gradesByStudent[student.id] || [];
-                const totalFinalScores = studentGrades.reduce((sum, grade) => sum + (Number(grade.final) || 0), 0);
-                const averageScore = studentGrades.length > 0 ? (totalFinalScores / studentGrades.length).toFixed(1) : 'N/A';
+                const totalWeightedScores = studentGrades.reduce((sum, grade) => {
+                    const processScore = Number(grade.process) || 0;
+                    const midtermScore = Number(grade.midterm) || 0;
+                    const finalScore = Number(grade.final) || 0;
+                    const weightedScore = processScore * 0.3 + midtermScore * 0.2 + finalScore * 0.5;
+                    return sum + weightedScore;
+                }, 0);
+                const averageScore = studentGrades.length > 0 ? (totalWeightedScores / studentGrades.length).toFixed(1) : 'N/A';
 
                 return {
                     id: student.id,
@@ -163,7 +169,12 @@ class Student {
             const validGrades = gradesResult.filter(grade => grade.FinalScore !== null && grade.FinalScore !== undefined);
 
             const averageScore = validGrades.length > 0
-                ? (validGrades.reduce((sum, grade) => sum + Number(grade.FinalScore), 0) / validGrades.length).toFixed(1)
+                ? (validGrades.reduce((sum, grade) => {
+                    const processScore = Number(grade.ProcessScore) || 0;
+                    const midtermScore = Number(grade.MidtermScore) || 0;
+                    const finalScore = Number(grade.FinalScore) || 0;
+                    return sum + (processScore * 0.3 + midtermScore * 0.2 + finalScore * 0.5);
+                }, 0) / validGrades.length).toFixed(1)
                 : 'N/A';
 
             const paymentHistory = studentResult.payment_history

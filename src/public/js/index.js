@@ -343,7 +343,7 @@ if (prevPageButton) {
 }
 
 if (nextPageButton) {
-    nextPageButton.addEventListener('click', () => {s
+    nextPageButton.addEventListener('click', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
         let filteredStudents = [];
         allStudents.forEach(studentRow => {
@@ -415,6 +415,9 @@ confirmDeleteButton.addEventListener('click', async () => {
                 allStudents = allStudents.filter(row => row.dataset.studentId !== currentStudentIdToDelete);
                 showNotification('Xóa sinh viên thành công', 'success');
                 filterAndDisplayStudents();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             }
         } else {
             const errorMessages = {
@@ -430,7 +433,6 @@ confirmDeleteButton.addEventListener('click', async () => {
         closeDeleteModal();
     }
 });
-
 deleteConfirmationModal.addEventListener('click', (event) => {
     if (event.target === deleteConfirmationModal) closeDeleteModal();
 });

@@ -444,10 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             if (!isNaN(scores.process) || !isNaN(scores.midterm) || !isNaN(scores.final)) {
-                const weightedScore = (scores.process * 0.3) +
-                    (scores.midterm * 0.2) +
-                    (scores.final * 0.5);
-
+                const weightedScore = (scores.process * 0.3) + (scores.midterm * 0.2) + (scores.final * 0.5);
                 totalWeightedScore += weightedScore;
                 validSubjects++;
             }

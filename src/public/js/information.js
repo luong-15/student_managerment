@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.calculateAverageScore = () => {
         const subjects = document.querySelectorAll('#subject-scores-container > div');
-        let totalScore = 0;
+        let totalWeightedScore = 0;
         let validSubjects = 0;
 
         subjects.forEach(subject => {
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!isNaN(finalScore) && finalScore >= 0 && finalScore <= 10) {
                     const weightedScore = (processScore * 0.3) + (midtermScore * 0.2) + (finalScore * 0.5);
-                    totalScore += weightedScore;
+                    totalWeightedScore += weightedScore;
                     validSubjects++;
                 }
             }
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const averageScoreInput = document.getElementById('editStudentAverageScore');
         if (validSubjects > 0) {
-            const average = totalScore / validSubjects;
+            const average = totalWeightedScore / validSubjects;
             averageScoreInput.value = average.toFixed(1);
         } else {
             averageScoreInput.value = '-';
